@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: xsonts/frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+        env:
+        - name: CONSUL_HOST
+          value: "consul-svc"
+        - name: SERVICE_NAME
+          value: "front-service"
+        - name: SERVICE_PORT
+          value: "5001"
+        - name: SERVICE_HOST
+          value: "frontend"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+  namespace: microapp
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 5001
+    targetPort: 5001
+  type: NodePort

@@ -1,0 +1,6 @@
+Flask
+flask-cors
+flask-consulate
+mysqlclient
+Flask-SQLAlchemy
+six

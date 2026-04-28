@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Store - Orders</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body onload="loadProducts()">
+
+<div>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/products">Mini Store</a>
+
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+                <a class="nav-link" href="/users">Gestión de usuarios</a>
+                <a class="nav-link" href="/orders">Realizar una orden</a>
+                <a class="nav-link" href="/ordenes">Ordenes</a>
+        </ul>
+    </div>
+</nav>
+</div>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Crear Orden</h2>
+
+
+   <div class="container mt-4">
+
+    <!-- LOGIN -->
+    <div id="login-section">
+        <div class="card mb-4">
+            <div class="card-header">Autenticación</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="username" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" class="form-control">
+                </div>
+
+                <button class="btn btn-primary" onclick="login()">Iniciar sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCTOS (OCULTO AL INICIO) -->
+    <div id="products-section" style="display:none;">
+        <div class="card">
+            <div class="card-header">Seleccionar Productos</div>
+            <div class="card-body">
+                <table class="table table-bordered" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Disponibles</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <button class="btn btn-success" onclick="createOrder()">Crear Orden</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='scriptOrders.js') }}"></script>
+
+</body>
+</html>

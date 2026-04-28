@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-deployment
+  namespace: microapp
+spec:
+  replicas: 2
+  strategy:                  # estrategia
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: products
+      version: blue           # bluee-green
+  template:
+    metadata:
+      labels:
+        app: products
+        version: blue         #versión blue
+    spec:
+      containers:
+      - name: products
+        image: xsonts/microproductos:PLACEHOLDER_TAG 
+        imagePullPolicy: AIfNotPresent
+        ports:
+        - containerPort: 5003
+        env:
+        - name: CONSUL_HOST
+          value: "consul-svc"
+        - name: SERVICE_NAME
+          value: "products-service"
+        - name: SERVICE_PORT
+          value: "5003"
+        - name: SERVICE_HOST
+          value: "microproductos"
+        - name: MYSQL_HOST
+          value: "db-products-svc"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_PASSWORD
+          value: "root"
+        - name: MYSQL_DB
+          value: "productos"

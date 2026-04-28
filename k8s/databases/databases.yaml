@@ -1,0 +1,296 @@
+# ============================================================
+#  SECRET — contraseña compartida por todas las bases de datos
+# ============================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: microapp
+type: Opaque
+stringData:
+  root-password: "root"
+
+# ============================================================
+#  BASE DE DATOS: USERS
+# ============================================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-users
+  namespace: microapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-users-init
+  namespace: microapp
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS myflaskapp;
+    USE myflaskapp;
+    CREATE TABLE IF NOT EXISTS users (
+        id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        name varchar(255),
+        email varchar(255),
+        username varchar(255),
+        password varchar(255)
+    );
+    INSERT INTO users VALUES(null, "juan", "juan@gmail.com", "juan", "123"),
+        (null, "maria", "maria@gmail.com", "maria", "456");
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-users
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-users
+  template:
+    metadata:
+      labels:
+        app: db-users
+    spec:
+      containers:
+      - name: db-users
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        ports:
+        - containerPort: 3306
+        readinessProbe:
+          exec:
+            command:
+              - mysqladmin
+              - ping
+              - -h
+              - localhost
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        volumeMounts:
+        - name: init-sql
+          mountPath: /docker-entrypoint-initdb.d
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: init-sql
+        configMap:
+          name: db-users-init
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: pvc-users
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-users-svc
+  namespace: microapp
+spec:
+  selector:
+    app: db-users
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+# ============================================================
+#  BASE DE DATOS: PRODUCTS
+# ============================================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-products
+  namespace: microapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-products-init
+  namespace: microapp
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS productos;
+    USE productos;
+    CREATE TABLE IF NOT EXISTS productos (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255),
+        unidades INT,
+        precio FLOAT
+    );
+    INSERT INTO productos (nombre, unidades, precio) VALUES
+    ("Laptop", 10, 2500),
+    ("Mouse", 50, 25);
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-products
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-products
+  template:
+    metadata:
+      labels:
+        app: db-products
+    spec:
+      containers:
+      - name: db-products
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        ports:
+        - containerPort: 3306
+        readinessProbe:
+          exec:
+            command:
+              - mysqladmin
+              - ping
+              - -h
+              - localhost
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        volumeMounts:
+        - name: init-sql
+          mountPath: /docker-entrypoint-initdb.d
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: init-sql
+        configMap:
+          name: db-products-init
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: pvc-products
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-products-svc
+  namespace: microapp
+spec:
+  selector:
+    app: db-products
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+# ============================================================
+#  BASE DE DATOS: ORDERS
+# ============================================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-orders
+  namespace: microapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-orders-init
+  namespace: microapp
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS ordersdb;
+    USE ordersdb;
+    CREATE TABLE IF NOT EXISTS orders (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_name VARCHAR(255) NOT NULL,
+        user_email VARCHAR(255) NOT NULL,
+        total FLOAT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    INSERT INTO orders (user_name, user_email, total) VALUES
+    ("santiago", "santi@gmail.com", 2500);
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-orders
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-orders
+  template:
+    metadata:
+      labels:
+        app: db-orders
+    spec:
+      containers:
+      - name: db-orders
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        ports:
+        - containerPort: 3306
+        readinessProbe:
+          exec:
+            command:
+              - mysqladmin
+              - ping
+              - -h
+              - localhost
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        volumeMounts:
+        - name: init-sql
+          mountPath: /docker-entrypoint-initdb.d
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: init-sql
+        configMap:
+          name: db-orders-init
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: pvc-orders
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-orders-svc
+  namespace: microapp
+spec:
+  selector:
+    app: db-orders
+  ports:
+  - port: 3306
+    targetPort: 3306

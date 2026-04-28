@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+  namespace: microapp
+spec:
+  replicas: 2
+  strategy:                  # Estrategia 
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+      - name: users
+        image: xsonts/microusers:PLACEHOLDER_TAG   ##Esto es para que el pipeline actualice según su tag
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5002
+        env:
+        - name: CONSUL_HOST
+          value: "consul-svc"
+        - name: SERVICE_NAME
+          value: "users-service"
+        - name: SERVICE_PORT
+          value: "5002"
+        - name: SERVICE_HOST
+          value: "microusers"
+        - name: MYSQL_HOST
+          value: "db-users-svc"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_PASSWORD
+          value: "root"
+        - name: MYSQL_DB
+          value: "myflaskapp"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-svc
+  namespace: microapp
+spec:
+  selector:
+    app: users
+  ports:
+  - port: 5002
+    targetPort: 5002
+  type: ClusterIP

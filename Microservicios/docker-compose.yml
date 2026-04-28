@@ -1,0 +1,132 @@
+version: "3.9"
+
+services:
+
+  consul:
+    image: consul:1.15.4
+    command: agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5001:5001"
+    environment:
+      CONSUL_HOST: consul
+      SERVICE_NAME: front-service
+      SERVICE_PORT: 5001
+      SERVICE_HOST: frontend
+    depends_on:
+      - consul
+      - microusers
+      - microproductos
+
+  microusers:
+    build: ./microUsers
+    ports:
+      - "5002:5002"
+    environment:
+      CONSUL_HOST: consul
+      SERVICE_NAME: users-service
+      SERVICE_PORT: 5002
+      SERVICE_HOST: microusers
+      MYSQL_HOST: db_users
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: myflaskapp
+    depends_on:
+      - consul
+      - db_users
+
+  microusers2:
+    build: ./microUsers
+    ports:
+      - "5012:5002"
+    environment:
+      CONSUL_HOST: consul
+      SERVICE_NAME: users-service
+      SERVICE_PORT: 5002
+      SERVICE_HOST: microusers2
+      MYSQL_HOST: db_users
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: myflaskapp
+    depends_on:
+      - consul
+      - db_users
+
+  db_users:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db_users/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  microproductos:
+    build: ./microProductos
+    ports:
+      - "5003:5003"
+    environment:
+      CONSUL_HOST: consul
+      SERVICE_NAME: products-service
+      SERVICE_PORT: 5003
+      SERVICE_HOST: microproductos
+      MYSQL_HOST: db_productos
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: productos
+    depends_on:
+      - consul
+      - db_productos
+
+  microproductos2:
+    build: ./microProductos
+    ports:
+      - "5013:5003"
+    environment:
+      CONSUL_HOST: consul
+      SERVICE_NAME: products-service
+      SERVICE_PORT: 5003
+      SERVICE_HOST: microproductos2
+      MYSQL_HOST: db_productos
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: productos
+    depends_on:
+      - consul
+      - db_productos
+
+  db_productos:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db_products/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  microorders:
+    build: ./microOrders
+    ports:
+      - "5004:5004"
+    environment:
+      CONSUL_HOST: consul
+      MYSQL_HOST: db_orders
+    depends_on:
+      - db_orders
+
+  microorders2:
+    build: ./microOrders
+    ports:
+      - "5014:5004"
+    environment:
+      CONSUL_HOST: consul
+      MYSQL_HOST: db_orders
+    depends_on:
+      - db_orders
+
+  db_orders:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db_orders/init.sql:/docker-entrypoint-initdb.d/init.sql
