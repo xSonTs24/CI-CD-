@@ -4,10 +4,13 @@ from config import Config
 from orders.controllers.order_controller import order_controller
 from flask_consulate import Consul
 from flask_cors import CORS
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
+
+metrics = PrometheusMetrics(app)
 
 db.init_app(app)
 app.register_blueprint(order_controller)

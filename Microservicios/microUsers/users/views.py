@@ -4,6 +4,7 @@ from db.db import db
 from flask_cors import CORS
 from flask_consulate import Consul
 import os 
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +14,7 @@ db.init_app(app)
 # Registrando el blueprint del controlador de usuarios
 app.register_blueprint(user_controller)
 
+metrics = PrometheusMetrics(app)
 # -------- HEALTH CHECK --------
 @app.route('/healthcheck')
 def health_check():

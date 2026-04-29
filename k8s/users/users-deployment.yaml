@@ -17,6 +17,10 @@ spec:
     metadata:
       labels:
         app: users
+      annotations:                           # ← nuevo
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5002"
     spec:
       containers:
       - name: users
@@ -41,6 +45,12 @@ spec:
           value: "root"
         - name: MYSQL_DB
           value: "myflaskapp"
+        readinessProbe:                      # ← nuevo
+          httpGet:
+            path: /metrics
+            port: 5002
+          initialDelaySeconds: 10
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

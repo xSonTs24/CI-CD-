@@ -2,10 +2,14 @@ from flask import Flask, render_template
 from flask_cors import CORS
 from flask_consulate import Consul
 import os 
+from prometheus_flask_exporter import PrometheusMetrics  # ← línea 1
 
 app = Flask(__name__)
 CORS(app)
 app.config.from_object('config.Config')
+
+metrics = PrometheusMetrics(app)  # ← línea 2
+
 
 # Ruta para renderizar el template index.html
 @app.route('/')

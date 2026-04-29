@@ -20,6 +20,10 @@ spec:
       metadata:
         labels:
           version: green
+      annotations:                           # ← nuevo
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5003"
     spec:
       containers:
       - name: products
@@ -44,16 +48,3 @@ spec:
           value: "root"
         - name: MYSQL_DB
           value: "productos"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: products-svc
-  namespace: microapp
-spec:
-  selector:
-    app: products
-  ports:
-  - port: 5003
-    targetPort: 5003
-  type: ClusterIP
