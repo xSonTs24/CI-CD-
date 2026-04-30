@@ -5,7 +5,7 @@ metadata:
   namespace: microapp
 spec:
   replicas: 2
-  strategy:                  # estrategia
+  strategy: # estrategia
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
@@ -20,31 +20,31 @@ spec:
       metadata:
         labels:
           version: green
-      annotations:                           # ← nuevo
+      annotations: # ← nuevo
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
         prometheus.io/port: "5003"
     spec:
       containers:
-      - name: products
-        image: xsonts/microproductos:PLACEHOLDER_TAG 
-        imagePullPolicy: AIfNotPresent
-        ports:
-        - containerPort: 5003
-        env:
-        - name: CONSUL_HOST
-          value: "consul-svc"
-        - name: SERVICE_NAME
-          value: "products-service"
-        - name: SERVICE_PORT
-          value: "5003"
-        - name: SERVICE_HOST
-          value: "microproductos"
-        - name: MYSQL_HOST
-          value: "db-products-svc"
-        - name: MYSQL_USER
-          value: "root"
-        - name: MYSQL_PASSWORD
-          value: "root"
-        - name: MYSQL_DB
-          value: "productos"
+        - name: products
+          image: xsonts/microproductos:PLACEHOLDER_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5003
+          env:
+            - name: CONSUL_HOST
+              value: "consul-svc"
+            - name: SERVICE_NAME
+              value: "products-service"
+            - name: SERVICE_PORT
+              value: "5003"
+            - name: SERVICE_HOST
+              value: "microproductos"
+            - name: MYSQL_HOST
+              value: "db-products-svc"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              value: "root"
+            - name: MYSQL_DB
+              value: "productos"

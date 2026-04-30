@@ -5,7 +5,7 @@ metadata:
   namespace: microapp
 spec:
   replicas: 2
-  strategy:                  # estrategia
+  strategy: # estrategia
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
@@ -17,30 +17,34 @@ spec:
     metadata:
       labels:
         app: orders
+      annotations: # ← nuevo
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5004"
     spec:
       containers:
-      - name: orders
-        image: xsonts/microorders:PLACEHOLDER_TAG 
-        imagePullPolicy: AIfNotPresent
-        ports:
-        - containerPort: 5004
-        env:
-        - name: CONSUL_HOST
-          value: "consul-svc"
-        - name: MYSQL_HOST
-          value: "db-orders-svc"
-        - name: MYSQL_USER
-          value: "root"
-        - name: MYSQL_PASSWORD
-          value: "root"
-        - name: MYSQL_DB
-          value: "ordersdb"
-        readinessProbe:                      # ← nuevo
-          httpGet:
-            path: /metrics
-            port: 5004
-          initialDelaySeconds: 10
-          periodSeconds: 10
+        - name: orders
+          image: xsonts/microorders:PLACEHOLDER_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5004
+          env:
+            - name: CONSUL_HOST
+              value: "consul-svc"
+            - name: MYSQL_HOST
+              value: "db-orders-svc"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              value: "root"
+            - name: MYSQL_DB
+              value: "ordersdb"
+          readinessProbe: # ← nuevo
+            httpGet:
+              path: /metrics
+              port: 5004
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -51,6 +55,6 @@ spec:
   selector:
     app: orders
   ports:
-  - port: 5004
-    targetPort: 5004
+    - port: 5004
+      targetPort: 5004
   type: ClusterIP

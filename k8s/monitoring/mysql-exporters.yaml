@@ -1,0 +1,110 @@
+# Exporter para db-users
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-exporter-users
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-exporter-users
+  template:
+    metadata:
+      labels:
+        app: mysql-exporter-users
+    spec:
+      containers:
+        - name: exporter
+          image: prom/mysqld-exporter:latest
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "root:root@(db-users-svc:3306)/usersdb"
+          ports:
+            - containerPort: 9104
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-exporter-users
+  namespace: microapp
+spec:
+  selector:
+    app: mysql-exporter-users
+  ports:
+    - port: 9104
+      targetPort: 9104
+---
+# Exporter para db-products
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-exporter-products
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-exporter-products
+  template:
+    metadata:
+      labels:
+        app: mysql-exporter-products
+    spec:
+      containers:
+        - name: exporter
+          image: prom/mysqld-exporter:latest
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "root:root@(db-products-svc:3306)/productosdb"
+          ports:
+            - containerPort: 9104
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-exporter-products
+  namespace: microapp
+spec:
+  selector:
+    app: mysql-exporter-products
+  ports:
+    - port: 9104
+      targetPort: 9104
+---
+# Exporter para db-orders
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-exporter-orders
+  namespace: microapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-exporter-orders
+  template:
+    metadata:
+      labels:
+        app: mysql-exporter-orders
+    spec:
+      containers:
+        - name: exporter
+          image: prom/mysqld-exporter:latest
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "root:root@(db-orders-svc:3306)/ordersdb"
+          ports:
+            - containerPort: 9104
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-exporter-orders
+  namespace: microapp
+spec:
+  selector:
+    app: mysql-exporter-orders
+  ports:
+    - port: 9104
+      targetPort: 9104
