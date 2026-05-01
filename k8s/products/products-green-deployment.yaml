@@ -1,33 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: products-deployment
+  name: products-deployment-green
   namespace: microapp
 spec:
   replicas: 2
-  strategy: # estrategia
+  strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-  metadata:
-    name: products-deployment-green
-  spec:
-    selector:
-      matchLabels:
+  selector:
+    matchLabels:
+      app: products
+      version: green
+  template:
+    metadata:
+      labels:
+        app: products
         version: green
-    template:
-      metadata:
-        labels:
-          version: green
-      annotations: # ← nuevo
+      annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
         prometheus.io/port: "5003"
     spec:
       containers:
         - name: products
-          image: xsonts/microproductos:PLACEHOLDER_TAG
+          image: lalaf03/microproductos:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5003
@@ -48,3 +47,9 @@ spec:
               value: "root"
             - name: MYSQL_DB
               value: "productos"
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 5003
+            initialDelaySeconds: 10
+            periodSeconds: 10

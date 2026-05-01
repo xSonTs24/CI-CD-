@@ -18,8 +18,11 @@ spec:
         - name: exporter
           image: prom/mysqld-exporter:latest
           env:
-            - name: DATA_SOURCE_NAME
-              value: "root:root@(db-users-svc:3306)/usersdb"
+            - name: MYSQLD_EXPORTER_PASSWORD
+              value: "root"
+          args:
+            - --mysqld.address=db-users-svc:3306
+            - --mysqld.username=root
           ports:
             - containerPort: 9104
 ---
@@ -55,8 +58,11 @@ spec:
         - name: exporter
           image: prom/mysqld-exporter:latest
           env:
-            - name: DATA_SOURCE_NAME
-              value: "root:root@(db-products-svc:3306)/productosdb"
+            - name: MYSQLD_EXPORTER_PASSWORD
+              value: "root"
+          args:
+            - --mysqld.address=db-products-svc:3306
+            - --mysqld.username=root
           ports:
             - containerPort: 9104
 ---
@@ -92,8 +98,11 @@ spec:
         - name: exporter
           image: prom/mysqld-exporter:latest
           env:
-            - name: DATA_SOURCE_NAME
-              value: "root:root@(db-orders-svc:3306)/ordersdb"
+            - name: MYSQLD_EXPORTER_PASSWORD
+              value: "root"
+          args:
+            - --mysqld.address=db-orders-svc:3306
+            - --mysqld.username=root
           ports:
             - containerPort: 9104
 ---

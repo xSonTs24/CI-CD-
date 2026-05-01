@@ -4,3 +4,4 @@ flask-consulate
 mysqlclient
 Flask-SQLAlchemy
 six
+prometheus-flask-exporter

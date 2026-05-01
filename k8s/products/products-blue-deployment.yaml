@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: products
-          image: xsonts/microproductos:PLACEHOLDER_TAG
+          image: lalaf03/microproductos:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5003
