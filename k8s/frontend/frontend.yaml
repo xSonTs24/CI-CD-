@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: lalaf03/frontend:latest # ← cambio
+          image: xsonts/frontend:PLACEHOLDER_TAG # ← cambio
           imagePullPolicy: IfNotPresent # ← cambio
           ports:
             - containerPort: 5001
