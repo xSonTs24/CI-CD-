@@ -23,7 +23,7 @@ spec:
         prometheus.io/port: "5004"
     spec:
       containers:
-        - name: orders
+        - name: orders  
           image: xsonts/microorders:PLACEHOLDER_TAG
           imagePullPolicy: IfNotPresent
           ports:
