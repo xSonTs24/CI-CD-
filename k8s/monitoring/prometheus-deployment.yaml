@@ -13,12 +13,13 @@ spec:
       labels:
         app: prometheus
     spec:
+      serviceAccountName: prometheus        # ← usa el ServiceAccount con permisos
       containers:
         - name: prometheus
           image: prom/prometheus:latest
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
-            - "--storage.tsdb.retention.time=7d"
+            - "--storage.tsdb.retention.time=7d"    # R1.4: retención 7 días
           ports:
             - containerPort: 9090
           volumeMounts:
@@ -40,4 +41,5 @@ spec:
   ports:
     - port: 9090
       targetPort: 9090
-  type: ClusterIP
+      nodePort: 30090                       # ← acceso desde navegador
+  type: NodePort                            # ← cambio para la demo

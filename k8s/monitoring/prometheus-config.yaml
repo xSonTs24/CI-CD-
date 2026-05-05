@@ -8,17 +8,18 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
-
+ 
     alerting:
       alertmanagers:
         - static_configs:
             - targets:
                 - alertmanager:9093
-
+ 
     rule_files:
       - /etc/prometheus/alert_rules.yml
-
+ 
     scrape_configs:
+      # ── Métricas de los microservicios Flask via anotaciones ──
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
@@ -26,40 +27,55 @@ data:
               names:
                 - microapp
         relabel_configs:
+          # Solo scrapear pods con la anotación prometheus.io/scrape: "true"
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
             action: keep
             regex: "true"
+          # Usar el path de la anotación (/metrics)
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+            regex: (.+)
+          # Combinar IP del pod + puerto de la anotación → dirección correcta
+          - source_labels: [__meta_kubernetes_pod_ip,
+                            __meta_kubernetes_pod_annotation_prometheus_io_port]
             action: replace
             target_label: __address__
-            regex: (.+)
-            replacement: $1
-
+            regex: (.+);(.+)
+            replacement: $1:$2
+          # Agregar label con el nombre del pod
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          # Agregar label con el namespace
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+ 
+      # ── Métricas de MySQL ──
       - job_name: 'mysql-exporter-users'
         static_configs:
-          - targets: ['mysql-exporter-users:9104']
+          - targets: ['mysql-exporter-users.microapp.svc.cluster.local:9104']
             labels:
-              namespace: microapp
-
+              db: users
+ 
       - job_name: 'mysql-exporter-products'
         static_configs:
-          - targets: ['mysql-exporter-products:9104']
+          - targets: ['mysql-exporter-products.microapp.svc.cluster.local:9104']
             labels:
-              namespace: microapp
-
+              db: products
+ 
       - job_name: 'mysql-exporter-orders'
         static_configs:
-          - targets: ['mysql-exporter-orders:9104']
+          - targets: ['mysql-exporter-orders.microapp.svc.cluster.local:9104']
             labels:
-              namespace: microapp
-
+              db: orders
+ 
   alert_rules.yml: |
     groups:
       - name: alertas-proyecto
         rules:
+          # Alerta 1: Servicio caído
           - alert: ServicioCaido
             expr: up == 0
             for: 1m
@@ -68,34 +84,30 @@ data:
             annotations:
               summary: "Servicio caído: {{ $labels.job }}"
               description: "{{ $labels.job }} lleva más de 1 minuto sin responder."
-
+ 
+          # Alerta 2: CPU alta
           - alert: CPUAlta
             expr: rate(container_cpu_usage_seconds_total[5m]) > 0.80
             for: 2m
             labels:
               severity: warning
             annotations:
-              summary: "CPU alta en {{ $labels.job }}"
-              description: "{{ $labels.job }} lleva 2 minutos con CPU > 80%."
-
-          - alert: BuildFallido
-            expr: increase(github_actions_run_failed_total[10m]) > 2
-            for: 0m
-            labels:
-              severity: critical
-            annotations:
-              summary: "Builds fallando consecutivamente"
-              description: "Más de 2 builds fallidos en los últimos 10 minutos."
-
+              summary: "CPU alta en {{ $labels.pod }}"
+              description: "{{ $labels.pod }} lleva 2 minutos con CPU > 80%."
+ 
+          # Alerta 3: Memoria alta
           - alert: MemoriaAlta
-            expr: container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.85
+            expr: |
+              container_memory_usage_bytes
+              / container_spec_memory_limit_bytes > 0.85
             for: 2m
             labels:
               severity: warning
             annotations:
-              summary: "Memoria alta en {{ $labels.job }}"
-              description: "{{ $labels.job }} está usando más del 85% de su memoria."
-
+              summary: "Memoria alta en {{ $labels.pod }}"
+              description: "{{ $labels.pod }} está usando más del 85% de su memoria."
+ 
+          # Alerta 4: Errores HTTP 500
           - alert: ErroresHTTPAltos
             expr: rate(flask_http_request_total{status="500"}[5m]) > 0.05
             for: 1m
@@ -104,3 +116,13 @@ data:
             annotations:
               summary: "Errores HTTP 500 en {{ $labels.job }}"
               description: "{{ $labels.job }} tiene tasa alta de errores 500."
+ 
+          # Alerta 5: Builds fallidos (requiere github-actions-exporter)
+          - alert: BuildFallido
+            expr: increase(github_actions_run_failed_total[10m]) > 2
+            for: 0m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Builds fallando consecutivamente"
+              description: "Más de 2 builds fallidos en los últimos 10 minutos."

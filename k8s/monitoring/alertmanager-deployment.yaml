@@ -11,14 +11,14 @@ data:
       smtp_auth_username: 'tucorreo@gmail.com'
       smtp_auth_password: 'tu-app-password'
       smtp_require_tls: true
-
+ 
     route:
       group_by: ['alertname', 'job']
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 1h
       receiver: 'email-alertas'
-
+ 
     receivers:
       - name: 'email-alertas'
         email_configs:
@@ -66,4 +66,5 @@ spec:
   ports:
     - port: 9093
       targetPort: 9093
-  type: ClusterIP
+      nodePort: 30093                       # ← acceso desde navegador
+  type: NodePort      
