@@ -18,7 +18,7 @@ env:
 # ============================================================
 jobs:
   detect-changes:
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     outputs:
       frontend:       ${{ steps.filter.outputs.frontend }}
       microusers:     ${{ steps.filter.outputs.microusers }}
@@ -47,9 +47,15 @@ jobs:
   deploy-frontend:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --fix-missing pkg-config default-libmysqlclient-dev \
+            python3-dev build-essential
 
       - name: Login a Docker Hub
         uses: docker/login-action@v2
@@ -66,7 +72,6 @@ jobs:
 
       - name: Deploy frontend en Kubernetes
         run: |
-          # El runner corre en la VM, kubectl tiene acceso directo a Minikube
           sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" k8s/frontend/frontend.yml
           kubectl apply -f k8s/frontend/frontend.yml
           kubectl rollout status deployment/frontend \
@@ -79,21 +84,27 @@ jobs:
   deploy-microusers:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.microusers == 'true' }}
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
-      - name: Login a Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --fix-missing pkg-config default-libmysqlclient-dev \
+            python3-dev build-essential
 
       - name: Correr pruebas
         run: |
           pip install -r Microservicios/microUsers/requirements.txt
           cd Microservicios/microUsers
           python -m pytest tests/ -v || true
+
+      - name: Login a Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build y push imagen microusers
         run: |
@@ -116,21 +127,27 @@ jobs:
   deploy-microproductos:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.microproductos == 'true' }}
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
-      - name: Login a Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --fix-missing pkg-config default-libmysqlclient-dev \
+            python3-dev build-essential
 
       - name: Correr pruebas
         run: |
           pip install -r Microservicios/microProductos/requirements.txt
           cd Microservicios/microProductos
           python -m pytest tests/ -v || true
+
+      - name: Login a Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build y push imagen microproductos
         run: |
@@ -180,21 +197,27 @@ jobs:
   deploy-microorders:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.microorders == 'true' }}
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
-      - name: Login a Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --fix-missing pkg-config default-libmysqlclient-dev \
+            python3-dev build-essential
 
       - name: Correr pruebas
         run: |
           pip install -r Microservicios/microOrders/requirements.txt
           cd Microservicios/microOrders
           python -m pytest tests/ -v || true
+
+      - name: Login a Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build y push imagen microorders
         run: |
@@ -221,7 +244,7 @@ jobs:
       - deploy-microproductos
       - deploy-microorders
     if: always()
-    runs-on: self-hosted                             # ← cambio
+    runs-on: self-hosted
     steps:
       - name: Notificar resultado del pipeline
         run: |
