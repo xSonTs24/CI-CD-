@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: users
-          image: xsonts/microusers:PLACEHOLDER_TAG ##Esto es para que el pipeline actualice según su tag
+          image: xsonts/microusers:latest ##Esto es para que el pipeline actualice según su tag
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5002

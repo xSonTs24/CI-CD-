@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: orders  
-          image: xsonts/microorders:PLACEHOLDER_TAG
+          image: xsonts/microorders:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5004
