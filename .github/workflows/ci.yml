@@ -115,8 +115,8 @@ jobs:
 
       - name: Deploy microusers en Kubernetes
         run: |
-          sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" k8s/users/users.yml
-          kubectl apply -f k8s/users/users.yml
+          sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" k8s/users/users-deployment.yaml
+          kubectl apply -f k8s/users/users-deployment.yaml
           kubectl rollout status deployment/users-deployment \
             -n ${{ env.K8S_NAMESPACE }} \
             --timeout=120s
@@ -173,8 +173,8 @@ jobs:
           echo "Desplegando en: $TARGET"
 
           sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" \
-            k8s/products/products-${TARGET}.yml
-          kubectl apply -f k8s/products/products-${TARGET}.yml
+            k8s/products/products-${TARGET}-deployment.yaml
+          kubectl apply -f k8s/products/products-${TARGET}-deployment.yaml
 
           kubectl rollout status deployment/products-deployment-${TARGET} \
             -n ${{ env.K8S_NAMESPACE }} \
@@ -228,8 +228,8 @@ jobs:
 
       - name: Deploy microorders en Kubernetes
         run: |
-          sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" k8s/orders/orders.yml
-          kubectl apply -f k8s/orders/orders.yml
+          sed -i "s/PLACEHOLDER_TAG/${{ github.sha }}/g" k8s/orders/orders-deployment.yaml
+          kubectl apply -f k8s/orders/orders-deployment.yaml
           kubectl rollout status deployment/orders-deployment \
             -n ${{ env.K8S_NAMESPACE }} \
             --timeout=120s
