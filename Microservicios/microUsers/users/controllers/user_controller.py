@@ -77,6 +77,6 @@ def login():
         'email': user.email
     }), 200
 
-@user_controller.route('/version')
+@user_controller.route('/api/users/version')
 def version():
     return {'version': 'v2', 'mensaje': 'pipeline funcionando'}, 200
