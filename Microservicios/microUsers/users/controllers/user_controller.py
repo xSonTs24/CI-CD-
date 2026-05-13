@@ -79,4 +79,4 @@ def login():
 
 @user_controller.route('/api/users/version')
 def version():
-    return {'version': 'v2', 'mensaje': 'pipeline funcionando'}, 200
+    return {'version': 'v3', 'mensaje': 'pipeline funcionando'}, 200
