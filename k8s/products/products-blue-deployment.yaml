@@ -19,7 +19,7 @@ spec:
       labels:
         app: products
         version: blue #versión blue
-      annotations: # ← nuevo
+      annotations: 
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
         prometheus.io/port: "5003"
